@@ -42,6 +42,11 @@ let testCxxSettings: [CXXSetting] = cxxSettings + [
     .headerSearchPath(".."),
 ]
 
+let staticCxxSettings: [CXXSetting] = [
+    .define("REALM_STATIC_FRAMEWORK"),
+    .define("REALM_MACH_O_TYPE", to: "staticlib")
+]
+
 // SPM requires all targets to explicitly include or exclude every file, which
 // gets very awkward when we have four targets building from a single directory
 let objectServerTestSources = [
@@ -153,20 +158,22 @@ let package = Package(
     products: [
         .library(
             name: "Realm",
-            type: .dynamic,
+            type: .static,
             targets: ["Realm"]),
         .library(
             name: "RealmSwift",
-            type: .dynamic,
+            type: .static,
             targets: ["RealmSwift"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/realm/realm-core.git", exact: coreVersion)
-    ],
+    dependencies: [],
     targets: [
+      .binaryTarget(
+            name: "RealmCore",
+            path: "./core/realm-monorepo.xcframework"
+      ),
       .target(
             name: "Realm",
-            dependencies: [.product(name: "RealmCore", package: "realm-core")],
+            dependencies: ["RealmCore"],
             path: ".",
             exclude: [
                 "CHANGELOG.md",
@@ -272,7 +279,7 @@ let package = Package(
                 .copy("Realm/PrivacyInfo.xcprivacy")
             ],
             publicHeadersPath: "include",
-            cxxSettings: cxxSettings,
+            cxxSettings: cxxSettings + staticCxxSettings,
             linkerSettings: [
                 .linkedFramework("UIKit", .when(platforms: [.iOS, .macCatalyst, .tvOS, .watchOS]))
             ]
@@ -288,7 +295,8 @@ let package = Package(
             ],
             resources: [
                 .copy("PrivacyInfo.xcprivacy")
-            ]
+            ],
+            cxxSettings: staticCxxSettings
         ),
         .target(
             name: "RealmTestSupport",

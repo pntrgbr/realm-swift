@@ -6,7 +6,7 @@
 
 # Binaries
 *.dylib
-*.a
+#*.a
 *.o
 *.d
 *.libdeps
@@ -17,9 +17,9 @@
 *.realm.lock
 
 # core
-core
-core-*
-realm-core-*-xcframework
+#core
+#core-*
+#realm-core-*-xcframework
 
 # sh build.sh test
 build/
